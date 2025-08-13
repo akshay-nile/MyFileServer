@@ -1,8 +1,21 @@
-.app {
-    display: block;
-    margin: 1em 0.5em;
+.fullwindow {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-size: medium;
+}
+
+.button-panel {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.app {
+    display: block;
+    width: 100%;
+    margin: 1em 0.5em;
 }
 
 a {
@@ -17,6 +30,11 @@ ul {
 
 li {
     cursor: pointer;
+}
+
+button {
+    margin: 1em;
+    padding: 1em;
 }
 
 .hostname {
@@ -56,6 +74,7 @@ li {
 }
 
 a:hover,
+button:hover,
 .itemlabel:hover {
     color: blue;
 
