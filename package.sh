@@ -1,13 +1,19 @@
 #!/bin/bash
+# This script is designed to work with Git-Bash only.
 
 # --- SCRIPT DESCRIPTION ---
-# This script automates the process of building the frontend,
-# collecting backend dependencies, and organizing them into a new
-# directory named 'MyFileServer' in the project root.
-# This script is designed to be run in a Git Bash or other Unix-like shell environment.
+# This script automates:
+# 1) Creating the MyFileServer/libs folder (fresh)
+# 2) Building the frontend (dist folder)
+# 3) Moving dist to MyFileServer
+# 4) Copying backend python code files and requirements.txt
+# 5) Installing backend dependencies into libs
+# 6) Removing requirements.txt file
+# 7) Verifying the final structure
+
 
 # --- SCRIPT SETUP ---
-set -e  # Exit on first error
+set -e  # Exit immediately on error
 
 MY_FILE_SERVER_DIR="MyFileServer"
 FRONTEND_DIR="frontend"
@@ -15,64 +21,55 @@ BACKEND_DIR="backend"
 DIST_DIR="dist"
 REQUIREMENTS_FILE="requirements.txt"
 LIBS_DIR="libs"
+SERVICES_DIR="services"
 
 # --- MAIN LOGIC ---
 
-# 1) Creating MyFileServer folder, Remove old one if already exists
-echo "Step 1: Preparing $MY_FILE_SERVER_DIR directory..."
+# 1) Create MyFileServer/libs structure (delete old one if exists)
+echo "Step 1: Preparing $MY_FILE_SERVER_DIR folder..."
 if [ -d "$MY_FILE_SERVER_DIR" ]; then
-    echo "   Removing existing $MY_FILE_SERVER_DIR..."
+    echo "Removing existing $MY_FILE_SERVER_DIR..."
     rm -rf "$MY_FILE_SERVER_DIR"
 fi
-mkdir -p "$MY_FILE_SERVER_DIR"
+mkdir -p "$MY_FILE_SERVER_DIR/$LIBS_DIR"
+mkdir -p "$MY_FILE_SERVER_DIR/$SERVICES_DIR"
 
-# 2) Navigate to frontend and build
-echo "Step 2: Navigating to $FRONTEND_DIR and building..."
+# 2) Build frontend dist
+echo "Step 2: Building frontend..."
 cd "$FRONTEND_DIR"
 npm run build
 
+# Back to root
+cd ..
+
 # 3) Move dist to MyFileServer
-echo "Step 3: Moving $DIST_DIR..."
-mv "$DIST_DIR" "../$MY_FILE_SERVER_DIR/"
+echo "Step 3: Moving $FRONTEND_DIR/$DIST_DIR to $MY_FILE_SERVER_DIR..."
+mv "$FRONTEND_DIR/$DIST_DIR" "$MY_FILE_SERVER_DIR/"
 
-cd ".."  # back to root
+# 4) Copy backend files (only .py from services)
+echo "Step 4: Copying backend files..."
+cp "$BACKEND_DIR/server.py" "$MY_FILE_SERVER_DIR/"
+cp "$BACKEND_DIR/$REQUIREMENTS_FILE" "$MY_FILE_SERVER_DIR/"
+find "$BACKEND_DIR/$SERVICES_DIR" -maxdepth 1 -name "*.py" -exec cp {} "$MY_FILE_SERVER_DIR/$SERVICES_DIR/" \;
 
-# 4) Backend: generate requirements.txt
-echo "Step 4: Navigating to $BACKEND_DIR and freezing Python dependencies..."
-cd "$BACKEND_DIR"
-uv pip freeze > "$REQUIREMENTS_FILE"
-
-# 5) Move requirements.txt to MyFileServer
-echo "Step 5: Moving $REQUIREMENTS_FILE..."
-mv "$REQUIREMENTS_FILE" "../$MY_FILE_SERVER_DIR/"
-
-# 6) Copy backend code
-echo "Step 6: Copying backend files..."
-cp "server.py" "../$MY_FILE_SERVER_DIR/"
-mkdir -p "../$MY_FILE_SERVER_DIR/services"
-cp services/*.py "../$MY_FILE_SERVER_DIR/services/"
-
-cd ".."  # back to root
-
-# 7) Create libs folder
-echo "Step 7: Creating $LIBS_DIR..."
+# 5) Install backend dependencies into libs
+echo "Step 5: Installing Python dependencies in libs..."
 cd "$MY_FILE_SERVER_DIR"
-mkdir -p "$LIBS_DIR"
+pip install --target=$LIBS_DIR -r $REQUIREMENTS_FILE
 
-# 8) Install dependencies into libs
-echo "Step 8: Installing dependencies..."
-pip install --target="$LIBS_DIR" -r "$REQUIREMENTS_FILE"
-
-# 9) Remove requirements.txt
-echo "Step 9: Removing $REQUIREMENTS_FILE..."
+# 6) Delete requirements.txt from MyFileServer
+echo "Step 6: Removing $REQUIREMENTS_FILE..."
 rm "$REQUIREMENTS_FILE"
 
-# 10) Verify structure
-echo "Step 10: Verifying final directory structure..."
-if [ -d "libs" ] && [ -d "dist" ] && [ -d "services" ] && [ -f "server.py" ]; then
+# 7) Verify structure
+echo "Step 7: Verifying final structure..."
+if [ -d $SERVICES_DIR ] && \
+   [ -d $DIST_DIR ] && \
+   [ -d $LIBS_DIR ] && \
+   [ -f server.py ]; then
     echo ""
-    echo "✅ Successfully packaged MyFileServer..!"
+    echo "✅ Successfully packaged MyFileServer!"
 else
-    echo "❌ Setup failed: The final structure not as expected."
+    echo "❌ Packaging failed! final structure not as expected"
     exit 1
 fi
