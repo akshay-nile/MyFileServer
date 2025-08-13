@@ -39,6 +39,7 @@ def configure_environment(app: Flask) -> Flask:
 
         # Publish the appropriate socket address to my website
         host, port = app.config['HOST'], app.config['PORT']
+        host = host if host.count('.') == 3 else f'[{host}]'
         publish_server_address(f'http://{host}:{port}')
 
     return app

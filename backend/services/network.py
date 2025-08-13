@@ -21,8 +21,6 @@ def get_local_ip():
 def get_public_ip():
     try:
         ip = requests.get('https://ifconfig.me', timeout=5).text
-        if ip.count('.') != 3:
-            ip = f'[{ip}]'
     except requests.RequestException:
         ip = None
         print('Not connected to Internet')
@@ -32,18 +30,19 @@ def get_public_ip():
 def get_user_selection():
     text = input('Run server on Public IP (Yes/No): ').lower().strip()
 
-    # Entering Yes, yes, or simply y will get public ip
+    # Entering Yes or simply y will get public ip
     if text.startswith('y'):
         ip = get_public_ip()
-    # Entering No, no, n or simply nothing will get local ip
+    # Entering No, n or simply nothing will get local ip
     elif text.startswith('n') or not text:
         ip = get_local_ip()
-    else:                   # Otherwise use the localhost ip
+    # Otherwise use the localhost ip
+    else:
         ip = '127.0.0.1'
 
     if ip is None:
         exit()
-    print()     # Extra blank line to saperate the flask's logs
+    print()     # Extra blank line to saperate the Flask's logs
 
     return ip
 
