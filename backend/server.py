@@ -1,18 +1,21 @@
+# IT SHOULD ALWAYS BE THE FIRST IMPORT STATEMENT
+# TO MAKE SURE THE CORRECT ENVIRONMENT SETUP IS DONE FIRST
+import services.environment
+
+from services.decorators import validate_path
+from services.explorer import get_device_info, get_drives_info, get_items_info
+
 from flask import Flask, jsonify, render_template, request
 from werkzeug.exceptions import HTTPException
 
-from services.decorators import validate_path
-from services.environment import IS_DEV_ENV, configure_environment
-from services.explorer import get_device_info, get_drives_info, get_items_info
 
-
-app = configure_environment(Flask(__name__))
+app = services.environment.configure(Flask(__name__))
 
 
 # To serve the UI build from dist folder after packaging
 @app.route('/', methods=['GET'])
 def home():
-    if IS_DEV_ENV:
+    if services.environment.IS_DEV_ENV:
         return "<h1>Can not serve 'index.html' in Development Mode!</h1>"
     return render_template('index.html')
 
