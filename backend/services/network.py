@@ -1,7 +1,7 @@
-import requests
+import time
 import socket
 import threading
-import time
+import requests
 
 
 def get_local_ip():

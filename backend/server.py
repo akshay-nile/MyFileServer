@@ -1,5 +1,4 @@
-# IT SHOULD ALWAYS BE THE FIRST IMPORT STATEMENT
-# TO MAKE SURE THE CORRECT ENVIRONMENT SETUP IS DONE FIRST
+# This should be the first import statement for proper environment setup
 import services.environment
 
 from services.decorators import validate_path

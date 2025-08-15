@@ -1,17 +1,29 @@
 import os
 import sys
+import platform
 import importlib
+import subprocess
 
 
 # Identify (or guess) the current environment is dev or prod
 IS_DEV_ENV = all(map(os.path.exists, ('.venv', 'pyproject.toml', 'uv.lock')))
 
-# After packaging (i.e. prod environment) libs directory must be present
-if not IS_DEV_ENV and os.path.isdir('libs'):
+# After packaging (i.e. prod environment) libs folder must be present
+if not IS_DEV_ENV:
+    # Trying to install required dependencies if libs folder not found
+    if not os.path.isdir('libs'):
+        os.mkdir('libs')
+        requirements = ["flask==3.1.1", "requests==2.32.4"]  # pyproject.toml
+        subprocess.check_call(['pip', 'install', '--target=libs'] + requirements)
+
     # Add libs abs-path to the beginning of sys.path to point to the local libs
     libs_path = os.path.abspath('libs')
     if libs_path not in sys.path:
         sys.path.insert(0, libs_path)
+
+    # Create .nomedia file for Android to hide all the media files from Gallery
+    if platform.system() == 'Linux' and not os.path.isfile('.nomedia'):
+        open('.nomedia', 'w').close()
 
 
 from flask import Flask
