@@ -7,12 +7,12 @@ function App() {
   const [itemsInfo, setItemsInfo] = useState({ folders: [], files: [] });
   const [breadCrumb, setBreadCrumb] = useState([]);
 
-  useEffect(() => { loadDeviceInfo() }, []);
+  useEffect(() => { loadDeviceInfo(); });
 
   async function loadDeviceInfo() {
     setDeviceInfo(await fetchItemsInfo('/'));
     setItemsInfo({ folders: [], files: [] });
-    setBreadCrumb(breadCrumb.map(b => { return { ...b, visible: false } })); // Make all invisible
+    setBreadCrumb(breadCrumb.map(b => { return { ...b, visible: false }; })); // Make all invisible
   }
 
   async function loadItemsInfo(path, label = null) {
@@ -109,9 +109,8 @@ function App() {
           </ul>
         }
       </div>
-
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
